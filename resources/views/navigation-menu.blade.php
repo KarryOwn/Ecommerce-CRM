@@ -11,10 +11,29 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">   
+                    <x-nav-link href="{{ route('crm.dashboard') }}" :active="request()->routeIs('crm.dashboard')">
+                        {{ __('CRM Dashboard') }}
                     </x-nav-link>
+
+                    <x-nav-link href="{{ route('customers.index') }}" :active="request()->routeIs('customers.*')">
+                        {{ __('Customers') }}
+                    </x-nav-link>
+
+                    <x-nav-link href="{{ route('segmentation.index') }}" :active="request()->routeIs('segmentation.*')">
+                        {{ __('Segmentation') }}
+                    </x-nav-link>
+
+                    <x-nav-link href="{{ route('analytics.dashboard') }}" :active="request()->routeIs('analytics.dashboard')">
+                        {{ __('Analytics') }}
+                    </x-nav-link>
+
+                    @if(request()->route('customer'))
+                    <x-nav-link href="{{ route('customers.interactions.index', ['customer' => request()->route('customer')]) }}" 
+                                :active="request()->routeIs('customers.interactions.*')">
+                        {{ __('Interactions') }}
+                    </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -139,9 +158,29 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
+            
+            <x-responsive-nav-link href="{{ route('crm.dashboard') }}" :active="request()->routeIs('crm.dashboard')">
+                {{ __('CRM Dashboard') }}
             </x-responsive-nav-link>
+
+            <x-responsive-nav-link href="{{ route('customers.index') }}" :active="request()->routeIs('customers.*')">
+                {{ __('Customers') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link href="{{ route('segmentation.index') }}" :active="request()->routeIs('segmentation.*')">
+                {{ __('Segmentation') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link href="{{ route('analytics.dashboard') }}" :active="request()->routeIs('analytics.dashboard')">
+                {{ __('Analytics') }}
+            </x-responsive-nav-link>
+
+            @if(request()->route('customer'))
+            <x-responsive-nav-link href="{{ route('customers.interactions.index', ['customer' => request()->route('customer')]) }}" 
+                                 :active="request()->routeIs('customers.interactions.*')">
+                {{ __('Interactions') }}
+            </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->
