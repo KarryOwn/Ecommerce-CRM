@@ -57,6 +57,37 @@
         </div>
     </div>
 
+    <!-- Customer Activity -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-lg font-medium mb-4">Customer Activity</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Orders Section -->
+            <div>
+                <h3 class="text-sm font-medium text-gray-500 mb-2">Recent Orders</h3>
+                @forelse($customer->orders()->latest()->take(5)->get() as $order)
+                    <div class="border-b py-2">
+                        <a href="{{ route('orders.show', $order) }}" 
+                           class="text-blue-600 hover:text-blue-900">
+                            Order #{{ $order->order_number }}
+                        </a>
+                        <p class="text-sm text-gray-500">
+                            {{ $order->created_at->format('M d, Y') }} - 
+                            ${{ number_format($order->total_amount, 2) }}
+                        </p>
+                    </div>
+                @empty
+                    <p class="text-gray-500">No orders found</p>
+                @endforelse
+                <div class="mt-2">
+                    <a href="{{ route('orders.index', ['customer_id' => $customer->id]) }}" 
+                       class="text-blue-600 hover:text-blue-900 text-sm">
+                        View All Orders
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Customer Interactions -->
     <div class="bg-white rounded-lg shadow-md p-6">
         <h2 class="text-xl font-semibold mb-4">Interactions History</h2>

@@ -5,6 +5,8 @@ use App\Http\Controllers\CrmController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\CustomerSegmentationController;
 use App\Http\Controllers\CustomerInteractionController;
+use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\OrdersController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -16,7 +18,7 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('/dashboard', function () {
-        return view('dashboard');
+        return redirect()->route('crm.dashboard');
     })->name('dashboard');
 
     // CRM Routes
@@ -32,9 +34,10 @@ Route::middleware([
     
     // Analytics Routes
     Route::get('/crm/analytics', [AnalyticsController::class, 'dashboard'])->name('analytics.dashboard');
+    Route::get('/analytics', [AnalyticsController::class, 'dashboard'])->name('analytics.dashboard');
     
     // Segmentation Routes
-    Route::prefix('crm')->group(function () {
+    Route::prefix('crm')->middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
         Route::get('/segmentation', [CustomerSegmentationController::class, 'index'])->name('segmentation.index');
         Route::get('/segmentation/create', [CustomerSegmentationController::class, 'create'])->name('segmentation.create');
         Route::post('/segmentation', [CustomerSegmentationController::class, 'store'])->name('segmentation.store');
@@ -57,5 +60,17 @@ Route::middleware([
             ->name('customers.interactions.update');
         Route::get('/customers/{customer}/interactions/{interaction}/attachments/{index}', [CustomerInteractionController::class, 'downloadAttachment'])
             ->name('customers.interactions.download');
+        
+        // Product Routes
+        Route::resource('products', ProductsController::class);
+        Route::post('products/{product}/update-stock', [ProductsController::class, 'updateStock'])
+            ->name('products.update-stock');
+        
+        // Order Routes
+        Route::get('/orders', [OrdersController::class, 'index'])->name('orders.index');
+        Route::get('/orders/create', [OrdersController::class, 'create'])->name('orders.create');
+        Route::post('/orders', [OrdersController::class, 'store'])->name('orders.store');
+        Route::get('/orders/{order}', [OrdersController::class, 'show'])->name('orders.show');
+        Route::patch('/orders/{order}/status', [OrdersController::class, 'updateStatus'])->name('orders.update-status');
     });
 });

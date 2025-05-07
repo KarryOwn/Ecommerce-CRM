@@ -2,38 +2,44 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Sale;
+use App\Models\Order;
 use App\Models\Customer;
-use Illuminate\Http\Request;
+use App\Models\CustomerSegment;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class AnalyticsController extends Controller
 {
     public function dashboard()
     {
-        // Sales Analytics
-        $totalSales = Sale::where('status', 'completed')->sum('amount');
-        $monthlySales = Sale::where('status', 'completed')
-            ->whereYear('created_at', now()->year)
-            ->whereMonth('created_at', now()->month)
-            ->sum('amount');
+        // Calculate total sales
+        $totalSales = Order::where('status', '!=', 'cancelled')
+            ->sum('total_amount');
 
-        // Customer Analytics
+        // Calculate monthly sales
+        $monthlySales = Order::where('status', '!=', 'cancelled')
+            ->whereMonth('created_at', Carbon::now()->month)
+            ->sum('total_amount');
+
+        // Get customer growth data (last 30 days)
         $customerGrowth = Customer::select(
-            DB::raw('DATE_FORMAT(created_at, "%Y-%m") as month'),
+            DB::raw('DATE(created_at) as date'),
             DB::raw('COUNT(*) as count')
         )
-            ->groupBy('month')
-            ->orderBy('month', 'desc')
-            ->limit(6)
-            ->get();
+            ->where('created_at', '>=', Carbon::now()->subDays(30))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'date' => Carbon::parse($item->date)->format('M d'),
+                    'count' => $item->count
+                ];
+            });
 
-        // Segment Performance
-        $segmentPerformance = DB::table('customer_segments')
-            ->leftJoin('customer_customer_segment', 'customer_segments.id', '=', 'customer_customer_segment.customer_segment_id')
-            ->leftJoin('customers', 'customer_customer_segment.customer_id', '=', 'customers.id')
-            ->select('customer_segments.name', DB::raw('COUNT(DISTINCT customers.id) as customer_count'))
-            ->groupBy('customer_segments.id', 'customer_segments.name')
+        // Get segment performance
+        $segmentPerformance = CustomerSegment::withCount('customers')
+            ->orderByDesc('customers_count')
             ->get();
 
         return view('crm.analytics.dashboard', compact(
