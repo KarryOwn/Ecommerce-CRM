@@ -12,6 +12,11 @@ class AnalyticsController extends Controller
 {
     public function dashboard()
     {
+        // Get orders for the current month
+        $orders = Order::where('status', '!=', 'cancelled')
+            ->whereMonth('created_at', now()->month)
+            ->get();
+
         // Calculate customer growth for the last 30 days
         $customerGrowth = Customer::select(
             DB::raw('DATE(created_at) as date'),
@@ -35,20 +40,60 @@ class AnalyticsController extends Controller
 
         $customerGrowth = $dates;
 
-        // Calculate other metrics
-        $totalSales = Order::where('status', '!=', 'cancelled')->sum('total_amount');
-        $monthlySales = Order::where('status', '!=', 'cancelled')
-            ->whereMonth('created_at', now()->month)
+        // Calculate metrics
+        $totalSales = Order::where('status', '!=', 'cancelled')
             ->sum('total_amount');
+
+        $monthlySales = $orders->sum('total_amount');
+
         $segmentPerformance = CustomerSegment::withCount('customers')
             ->orderByDesc('customers_count')
             ->get();
+
+        $buyerTrends = [
+            'popular_products' => $orders
+                ->flatMap(fn($order) => $order->items)
+                ->groupBy('product_id')
+                ->map(function($items) {
+                    $first = $items->first();
+                    return [
+                        'product' => $first->product->name,
+                        'quantity' => $items->sum('quantity'),
+                        'revenue' => $items->sum('subtotal')
+                    ];
+                })
+                ->sortByDesc('quantity')
+                ->take(5)
+                ->values(),
+
+            'customer_segments' => CustomerSegment::withCount(['customers as orders_count' => function($query) {
+                    $query->has('orders');
+                }])
+                ->withSum(['customers as total_revenue' => function($query) {
+                    $query->join('orders', 'customers.id', '=', 'orders.customer_id')
+                        ->where('orders.status', '!=', 'cancelled');
+                }], 'orders.total_amount')
+                ->get(),
+
+            'peak_hours' => $orders
+                ->groupBy(function($order) {
+                    return $order->created_at->format('H');
+                })
+                ->map(fn($orders) => $orders->count())
+                ->sortKeys(),
+
+            'repeat_customers' => Customer::withCount('orders')
+                ->having('orders_count', '>', 1)
+                ->count(),
+        ];
 
         return view('crm.analytics.dashboard', compact(
             'customerGrowth',
             'totalSales',
             'monthlySales',
-            'segmentPerformance'
+            'segmentPerformance',
+            'buyerTrends',
+            'orders'  // Add orders to the view
         ));
     }
 }

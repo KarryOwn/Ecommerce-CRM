@@ -14,16 +14,16 @@ return new class extends Migration
         Schema::create('customer_interactions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->enum('type', ['support', 'inquiry', 'complaint', 'feedback', 'other']);
             $table->string('subject');
             $table->text('description');
+            $table->text('resolution')->nullable();
+            $table->foreignId('resolved_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->dateTime('resolved_at')->nullable();
             $table->text('notes')->nullable();
-            $table->enum('status', ['open', 'in_progress', 'resolved', 'closed'])->default('open');
-            $table->foreignId('handled_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamps();
-        });
-
-        Schema::table('customer_interactions', function (Blueprint $table) {
+            $table->enum('status', ['pending', 'in_progress', 'completed'])->default('pending');
+            $table->boolean('requires_followup')->default(false);
             $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
             $table->dateTime('scheduled_at')->nullable();
             $table->dateTime('completed_at')->nullable();
@@ -31,6 +31,7 @@ return new class extends Migration
             $table->string('channel')->default('email');
             $table->json('tags')->nullable();
             $table->json('attachments')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -40,16 +41,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('customer_interactions', function (Blueprint $table) {
-            $table->dropColumn([
-                'priority',
-                'scheduled_at',
-                'completed_at',
-                'follow_up_date',
-                'channel',
-                'tags',
-                'attachments'
-            ]);
-            $table->dropColumn('notes');
+            $table->dropForeign(['resolved_by']);
+            $table->dropColumn(['resolution', 'resolved_by', 'resolved_at']);
         });
 
         Schema::dropIfExists('customer_interactions');

@@ -11,27 +11,22 @@ class CustomerInteraction extends Model
 
     protected $fillable = [
         'customer_id',
+        'user_id',
         'type',
         'subject',
         'description',
         'status',
         'priority',
-        'handled_by',
-        'scheduled_at',
-        'completed_at',
-        'follow_up_date',
         'channel',
-        'tags',
-        'attachments',
-        'notes'  // Add this line
+        'resolution',
+        'resolved_by',
+        'resolved_at',
+        'requires_followup',
     ];
 
     protected $casts = [
-        'scheduled_at' => 'datetime',
-        'completed_at' => 'datetime',
-        'follow_up_date' => 'datetime',
-        'tags' => 'array',
-        'attachments' => 'array'
+        'resolved_at' => 'datetime',
+        'requires_followup' => 'boolean',
     ];
 
     public function customer()
@@ -41,11 +36,11 @@ class CustomerInteraction extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'handled_by');
+        return $this->belongsTo(User::class);
     }
 
-    public function handler()
+    public function resolver()
     {
-        return $this->user();
+        return $this->belongsTo(User::class, 'resolved_by');
     }
 }

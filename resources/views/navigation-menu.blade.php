@@ -45,6 +45,11 @@
                     <x-nav-link href="{{ route('analytics.dashboard') }}" :active="request()->routeIs('analytics.*')">
                         {{ __('Analytics') }}
                     </x-nav-link>
+
+                    <!-- Interactions Link -->
+                    <x-nav-link href="{{ route('interactions.dashboard') }}" :active="request()->routeIs('interactions.dashboard')">
+                        {{ __('Interactions') }}
+                    </x-nav-link>
                 </div>
             </div>
 

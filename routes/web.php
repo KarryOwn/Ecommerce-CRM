@@ -63,6 +63,19 @@ Route::middleware([
             ->name('customers.interactions.update');
         Route::get('/customers/{customer}/interactions/{interaction}/attachments/{index}', [CustomerInteractionController::class, 'downloadAttachment'])
             ->name('customers.interactions.download');
+        Route::patch('/customers/{customer}/interactions/{interaction}/resolve', 
+            [CustomerInteractionController::class, 'resolve'])
+            ->name('customers.interactions.resolve');
+        
+        // General Interactions Dashboard
+        Route::get('/interactions', [CustomerInteractionController::class, 'dashboard'])
+            ->name('interactions.dashboard');
+        Route::get('/interactions/create', [CustomerInteractionController::class, 'create'])
+            ->name('interactions.create');
+        Route::post('/interactions', [CustomerInteractionController::class, 'store'])
+            ->name('interactions.store');
+        Route::get('/interactions/{interaction}', [CustomerInteractionController::class, 'show'])
+            ->name('interactions.show');
         
         // Product Routes
         Route::resource('products', ProductsController::class);
