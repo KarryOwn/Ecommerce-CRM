@@ -12,40 +12,42 @@ class AnalyticsController extends Controller
 {
     public function dashboard()
     {
-        // Calculate total sales
-        $totalSales = Order::where('status', '!=', 'cancelled')
-            ->sum('total_amount');
-
-        // Calculate monthly sales
-        $monthlySales = Order::where('status', '!=', 'cancelled')
-            ->whereMonth('created_at', Carbon::now()->month)
-            ->sum('total_amount');
-
-        // Get customer growth data (last 30 days)
+        // Calculate customer growth for the last 30 days
         $customerGrowth = Customer::select(
             DB::raw('DATE(created_at) as date'),
             DB::raw('COUNT(*) as count')
         )
-            ->where('created_at', '>=', Carbon::now()->subDays(30))
+            ->where('created_at', '>=', now()->subDays(30))
             ->groupBy('date')
             ->orderBy('date')
-            ->get()
-            ->map(function ($item) {
-                return [
-                    'date' => Carbon::parse($item->date)->format('M d'),
-                    'count' => $item->count
-                ];
-            });
+            ->get();
 
-        // Get segment performance
+        // Ensure we have data for all 30 days
+        $dates = collect();
+        for ($i = 30; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $count = $customerGrowth->where('date', $date)->first()?->count ?? 0;
+            $dates->push([
+                'date' => now()->subDays($i)->format('M d'),
+                'count' => $count
+            ]);
+        }
+
+        $customerGrowth = $dates;
+
+        // Calculate other metrics
+        $totalSales = Order::where('status', '!=', 'cancelled')->sum('total_amount');
+        $monthlySales = Order::where('status', '!=', 'cancelled')
+            ->whereMonth('created_at', now()->month)
+            ->sum('total_amount');
         $segmentPerformance = CustomerSegment::withCount('customers')
             ->orderByDesc('customers_count')
             ->get();
 
         return view('crm.analytics.dashboard', compact(
+            'customerGrowth',
             'totalSales',
             'monthlySales',
-            'customerGrowth',
             'segmentPerformance'
         ));
     }

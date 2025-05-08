@@ -5,8 +5,9 @@ namespace App\Listeners;
 use App\Events\CustomerUpdated;
 use App\Models\CustomerSegment;
 use App\Services\SegmentationService;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-class EvaluateCustomerSegments
+class EvaluateCustomerSegments implements ShouldQueue
 {
     protected $segmentationService;
 
@@ -18,7 +19,7 @@ class EvaluateCustomerSegments
     public function handle(CustomerUpdated $event)
     {
         $customer = $event->customer;
-        $segments = CustomerSegment::all();
+        $segments = CustomerSegment::where('is_active', true)->get();
 
         foreach ($segments as $segment) {
             if ($this->segmentationService->evaluateCustomerForSegment($customer, $segment)) {

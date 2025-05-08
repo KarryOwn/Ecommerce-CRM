@@ -106,6 +106,27 @@ class CustomerSegmentationController extends Controller
             ->with('success', 'Segment evaluation completed');
     }
 
+    public function evaluateAll()
+    {
+        $segments = CustomerSegment::where('is_active', true)->get();
+        $customers = Customer::all();
+        $segmentationService = app(SegmentationService::class);
+        
+        foreach ($segments as $segment) {
+            // Clear existing assignments
+            $segment->customers()->detach();
+            
+            // Evaluate each customer for this segment
+            foreach ($customers as $customer) {
+                if ($segmentationService->evaluateCustomerForSegment($customer, $segment)) {
+                    $segment->customers()->attach($customer->id);
+                }
+            }
+        }
+
+        return redirect()->back()->with('success', 'All segments have been re-evaluated.');
+    }
+
     private function processSegmentCriteria(CustomerSegment $segment)
     {
         $query = Customer::query();

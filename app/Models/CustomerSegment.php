@@ -25,14 +25,4 @@ class CustomerSegment extends Model
     {
         return $this->belongsToMany(Customer::class);
     }
-
-    public function rules()
-    {
-        return $this->hasMany(SegmentRule::class, 'segment_id');
-    }
-
-    public function getCriteriaAttribute($value)
-    {
-        return is_string($value) ? json_decode($value, true) ?? [] : (array)$value;
-    }
 }

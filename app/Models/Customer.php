@@ -39,7 +39,8 @@ class Customer extends Model
     ];
 
     protected $dispatchesEvents = [
-        'saved' => CustomerUpdated::class,
+        'created' => CustomerUpdated::class,
+        'updated' => CustomerUpdated::class
     ];
 
     public function orders()

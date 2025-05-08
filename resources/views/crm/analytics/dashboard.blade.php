@@ -22,7 +22,7 @@
     <!-- Customer Growth Chart -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
         <h3 class="text-lg font-semibold text-gray-800 mb-4">Customer Growth</h3>
-        <div class="h-80">
+        <div style="height: 400px;">
             <canvas id="customerGrowthChart"></canvas>
         </div>
     </div>
@@ -59,14 +59,18 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const ctx = document.getElementById('customerGrowthChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: {!! json_encode($customerGrowth->pluck('date')) !!},
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('customerGrowthChart');
+        if (!ctx) {
+            console.error('Canvas element not found');
+            return;
+        }
+
+        const chartData = {
+            labels: {!! json_encode(collect($customerGrowth)->pluck('date')) !!},
             datasets: [{
                 label: 'New Customers by Day',
-                data: {!! json_encode($customerGrowth->pluck('count')) !!},
+                data: {!! json_encode(collect($customerGrowth)->pluck('count')) !!},
                 borderColor: 'rgb(59, 130, 246)',
                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
                 tension: 0.1,
@@ -74,45 +78,50 @@
                 pointRadius: 4,
                 pointHoverRadius: 6
             }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    grid: {
-                        display: false
-                    },
-                    ticks: {
-                        maxRotation: 45,
-                        minRotation: 45
-                    }
-                },
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        precision: 0,
-                        stepSize: 1
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    display: true,
-                    position: 'top'
-                },
-                tooltip: {
-                    callbacks: {
-                        title: (tooltipItems) => {
-                            return 'Date: ' + tooltipItems[0].label;
+        };
+
+        new Chart(ctx, {
+            type: 'line',
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
                         },
-                        label: (context) => {
-                            return 'New Customers: ' + context.raw;
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0,
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: (tooltipItems) => {
+                                return 'Date: ' + tooltipItems[0].label;
+                            },
+                            label: (context) => {
+                                return 'New Customers: ' + context.raw;
+                            }
                         }
                     }
                 }
             }
-        }
+        });
     });
 </script>
 @endpush

@@ -7,6 +7,7 @@ use App\Http\Controllers\CustomerSegmentationController;
 use App\Http\Controllers\CustomerInteractionController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\OrdersController;
+use App\Http\Controllers\CustomerSegmentController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -46,6 +47,8 @@ Route::middleware([
         Route::delete('/segmentation/{segment}', [CustomerSegmentationController::class, 'destroy'])->name('segmentation.destroy');
         Route::post('/segmentation/{segment}/evaluate', [CustomerSegmentationController::class, 'evaluateSegment'])
             ->name('segmentation.evaluate');
+        Route::post('/segments/evaluate-all', [CustomerSegmentationController::class, 'evaluateAll'])
+            ->name('segments.evaluate-all');
         
         // Customer Interaction Routes
         Route::get('/customers/{customer}/interactions', [CustomerInteractionController::class, 'index'])
