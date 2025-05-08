@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\CustomerSegment;
 use App\Services\SegmentationService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class CustomerSegmentationController extends Controller
 {
@@ -35,16 +36,42 @@ class CustomerSegmentationController extends Controller
         return view('crm.segmentation.create', compact('conditions'));
     }
 
+    protected function validateCriteria($criteria)
+    {
+        foreach ($criteria as $criterion) {
+            if ($criterion['field'] === 'loyalty_tier') {
+                $validTiers = ['bronze', 'silver', 'gold', 'platinum'];
+                if (!in_array(strtolower($criterion['value']), $validTiers)) {
+                    throw ValidationException::withMessages([
+                        'criteria' => ['Invalid loyalty tier value. Must be bronze, silver, gold, or platinum.']
+                    ]);
+                }
+                if (!in_array($criterion['operator'], ['=', '!='])) {
+                    throw ValidationException::withMessages([
+                        'criteria' => ['Loyalty tier only supports = and != operators.']
+                    ]);
+                }
+            }
+            
+            if (in_array($criterion['field'], ['total_orders', 'lifetime_value'])) {
+                if (!is_numeric($criterion['value'])) {
+                    throw ValidationException::withMessages([
+                        'criteria' => ['Value must be numeric for ' . $criterion['field']]
+                    ]);
+                }
+            }
+        }
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'criteria' => 'nullable|array',
-            'criteria.*.field' => 'required|string',
-            'criteria.*.operator' => 'required|string',
-            'criteria.*.value' => 'required|string',
+            'criteria' => 'required|array'
         ]);
+
+        $this->validateCriteria($validated['criteria']);
 
         $segment = CustomerSegment::create([
             'name' => $validated['name'],
@@ -129,24 +156,56 @@ class CustomerSegmentationController extends Controller
 
     private function processSegmentCriteria(CustomerSegment $segment)
     {
+        $query = $this->buildQuery($segment->criteria);
+
+        $customers = $query->get();
+        $segment->customers()->sync($customers->pluck('id'));
+    }
+
+    protected function buildQuery($criteria)
+    {
         $query = Customer::query();
 
-        foreach ($segment->criteria as $criterion) {
+        foreach ($criteria as $criterion) {
             $field = $criterion['field'];
             $operator = $criterion['operator'];
             $value = $criterion['value'];
 
-            switch ($operator) {
-                case 'between':
-                    $values = explode(',', $value);
-                    $query->whereBetween($field, $values);
+            switch ($field) {
+                case 'loyalty_tier':
+                    $query->whereHas('loyaltyPoints', function ($subQuery) use ($operator, $value) {
+                        // Ensure case-insensitive comparison
+                        $subQuery->whereRaw('LOWER(tier) ' . $operator . ' ?', [strtolower($value)]);
+                    });
                     break;
+
+                case 'lifetime_value':
+                    $query->where('lifetime_value', $operator, (float) $value);
+                    break;
+
+                case 'total_orders':
+                    $query->where('total_orders', $operator, (int) $value);
+                    break;
+
                 default:
-                    $query->where($field, $operator, $value);
+                    if ($operator === 'contains') {
+                        $query->where($field, 'LIKE', "%{$value}%");
+                    } elseif ($operator === 'starts_with') {
+                        $query->where($field, 'LIKE', "{$value}%");
+                    } else {
+                        $query->where($field, $operator, $value);
+                    }
             }
         }
 
-        $customers = $query->get();
-        $segment->customers()->sync($customers->pluck('id'));
+        return $query;
+    }
+
+    public function show(CustomerSegment $segment)
+    {
+        return view('crm.segmentation.show', [
+            'segment' => $segment->load('customers'),
+            'customersCount' => $segment->customers()->count()
+        ]);
     }
 }

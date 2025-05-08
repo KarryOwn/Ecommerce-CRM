@@ -132,4 +132,18 @@ class CrmController extends Controller
 
         return redirect()->route('customers.index')->with('success', 'Customer updated successfully');
     }
+
+    public function loyalty(Customer $customer)
+    {
+        $loyalty = $customer->loyaltyPoints()->firstOrCreate(
+            [],
+            ['points' => 0, 'lifetime_points' => 0, 'tier' => 'bronze']
+        );
+
+        $transactions = $customer->loyaltyTransactions()
+            ->latest()
+            ->paginate(20);
+
+        return view('crm.customers.loyalty', compact('customer', 'loyalty', 'transactions'));
+    }
 }

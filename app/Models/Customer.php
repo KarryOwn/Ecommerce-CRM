@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Events\CustomerUpdated;
 
 class Customer extends Model
@@ -56,5 +58,21 @@ class Customer extends Model
     public function segments()
     {
         return $this->belongsToMany(CustomerSegment::class);
+    }
+
+    /**
+     * Get the loyalty points for the customer.
+     */
+    public function loyaltyPoints(): HasOne
+    {
+        return $this->hasOne(LoyaltyPoint::class);
+    }
+
+    /**
+     * Get the loyalty transactions for the customer.
+     */
+    public function loyaltyTransactions(): HasMany
+    {
+        return $this->hasMany(LoyaltyTransaction::class);
     }
 }

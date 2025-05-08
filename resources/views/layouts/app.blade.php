@@ -18,10 +18,8 @@
         @livewireStyles
     </head>
     <body class="font-sans antialiased">
-        <x-banner />
-
         <div class="min-h-screen bg-gray-100">
-            @livewire('navigation-menu')
+            @include('navigation-menu')
 
             <!-- Page Heading -->
             @if (isset($header))
@@ -32,16 +30,20 @@
                 </header>
             @endif
 
+            <!-- Breadcrumbs -->
+            @if(isset($breadcrumbs))
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+                    <x-breadcrumbs :items="$breadcrumbs" />
+                </div>
+            @endif
+
             <!-- Page Content -->
             <main>
-                <div id="app">
-                    @yield('main-content')
-                </div>
+                @yield('main-content')
             </main>
         </div>
 
         @stack('modals')
-
         @livewireScripts
         @stack('scripts')
     </body>

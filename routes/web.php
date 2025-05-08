@@ -8,6 +8,9 @@ use App\Http\Controllers\CustomerInteractionController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\CustomerSegmentController;
+use App\Http\Controllers\CampaignController;
+use App\Http\Controllers\LoyaltyController;
+use App\Http\Controllers\LoyaltyTierController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -32,6 +35,7 @@ Route::middleware([
     Route::get('/crm/customers/{customer}/edit', [CrmController::class, 'edit'])->name('customers.edit');
     Route::put('/crm/customers/{customer}', [CrmController::class, 'update'])->name('customers.update');
     Route::get('/crm/customers/{customer}', [CrmController::class, 'show'])->name('customers.show');
+    Route::get('/customers/{customer}/loyalty', [CrmController::class, 'loyalty'])->name('customers.loyalty');
     
     // Analytics Routes
     Route::get('/crm/analytics', [AnalyticsController::class, 'dashboard'])->name('analytics.dashboard');
@@ -49,6 +53,8 @@ Route::middleware([
             ->name('segmentation.evaluate');
         Route::post('/segments/evaluate-all', [CustomerSegmentationController::class, 'evaluateAll'])
             ->name('segments.evaluate-all');
+        Route::get('/segmentation/{segment}', [CustomerSegmentationController::class, 'show'])
+            ->name('segments.show');
         
         // Customer Interaction Routes
         Route::get('/customers/{customer}/interactions', [CustomerInteractionController::class, 'index'])
@@ -88,5 +94,23 @@ Route::middleware([
         Route::post('/orders', [OrdersController::class, 'store'])->name('orders.store');
         Route::get('/orders/{order}', [OrdersController::class, 'show'])->name('orders.show');
         Route::patch('/orders/{order}/status', [OrdersController::class, 'updateStatus'])->name('orders.update-status');
+        
+        // Campaign Routes
+        Route::resource('campaigns', CampaignController::class);
+        Route::post('/campaigns/{campaign}/execute', [CampaignController::class, 'execute'])
+            ->name('campaigns.execute');
+        
+        // Loyalty Routes
+        Route::get('/loyalty', [LoyaltyController::class, 'dashboard'])
+            ->name('loyalty.dashboard');
+        Route::get('/loyalty/customer/{customer}', [LoyaltyController::class, 'customerPoints'])
+            ->name('loyalty.customer-points');
+        Route::get('/loyalty/dashboard', [LoyaltyController::class, 'dashboard'])->name('loyalty.dashboard');
+        Route::get('/loyalty/members', [LoyaltyController::class, 'members'])->name('loyalty.members');
+        Route::get('/loyalty/transactions', [LoyaltyController::class, 'transactions'])->name('loyalty.transactions');
+        Route::get('/loyalty/tiers', [LoyaltyController::class, 'tiers'])->name('loyalty.tiers');
+        Route::resource('loyalty/tiers', LoyaltyTierController::class);
+
+        Route::get('/loyalty/transactions/{transaction}', [LoyaltyController::class, 'showTransaction'])->name('loyalty.transactions.show');
     });
 });

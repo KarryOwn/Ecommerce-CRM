@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Services\LoyaltyService;
 
 class Order extends Model
 {
@@ -65,5 +66,28 @@ class Order extends Model
     public function getTrackingHistoryAttribute($value)
     {
         return json_decode($value, true) ?? [];
+    }
+
+    public function calculateLoyaltyPoints()
+    {
+        // Basic calculation: 1 point per $1 spent
+        return (int) $this->total_amount;
+    }
+
+    protected static function booted()
+    {
+        static::created(function ($order) {
+            $loyaltyService = new LoyaltyService();
+            
+            // Award points based on order total (1 point per dollar)
+            $points = (int) $order->total_amount;
+            
+            $loyaltyService->addPoints(
+                $order->customer_id,
+                $points,
+                'order_completed',
+                'Order #' . $order->id
+            );
+        });
     }
 }

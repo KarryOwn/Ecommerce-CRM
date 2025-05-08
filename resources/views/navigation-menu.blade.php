@@ -20,7 +20,7 @@
                         <button @click="open = ! open" class="flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition">
                             <span>CRM</span>
                             <svg class="ml-2 -mr-0.5 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 111.414 1.414l-4 4a1 1 01-1.414 0l-4-4a1 1 010-1.414z" clip-rule="evenodd" />
                             </svg>
                         </button>
                         <div x-show="open" class="absolute z-50 mt-32 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
@@ -50,6 +50,14 @@
                     <x-nav-link href="{{ route('interactions.dashboard') }}" :active="request()->routeIs('interactions.dashboard')">
                         {{ __('Interactions') }}
                     </x-nav-link>
+
+                    <x-nav-link href="{{ route('campaigns.index') }}" :active="request()->routeIs('campaigns.*')">
+                        {{ __('Campaigns') }}
+                    </x-nav-link>
+
+                    <x-nav-link href="{{ route('loyalty.dashboard') }}" :active="request()->routeIs('loyalty.*')">
+                        {{ __('Loyalty Program') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -61,7 +69,7 @@
                             <div>{{ Auth::user()->name }}</div>
                             <div class="ml-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 111.414 1.414l-4 4a1 1 01-1.414 0l-4-4a1 1 010-1.414z" clip-rule="evenodd" />
                                 </svg>
                             </div>
                         </button>
