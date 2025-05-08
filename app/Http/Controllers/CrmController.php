@@ -80,7 +80,7 @@ class CrmController extends Controller
             'handled_by' => auth()->id(),
         ]);
 
-        return redirect()->back()->with('success', 'Interaction recorded successfully');
+        return redirect()->route('customers.interactions.index', $customer)->with('success', 'Interaction recorded successfully');
     }
 
     public function create()

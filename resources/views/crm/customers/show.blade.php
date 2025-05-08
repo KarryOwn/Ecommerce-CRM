@@ -99,19 +99,21 @@
         <div class="mt-6">
             <h3 class="text-lg font-semibold mb-4">Recent Interactions</h3>
             <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="p-4 border-b flex justify-between items-center">
+                <div class="p-4 border-b">
                     <span class="text-gray-600">Latest interactions with customer</span>
-                    <a href="{{ route('interactions.create', ['customer_id' => $customer->id]) }}" 
-                       class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-                        New Interaction
-                    </a>
                 </div>
             </div>
         </div>
 
         <!-- Customer Interactions -->
         <div class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-xl font-semibold mb-4">Interactions History</h2>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Interactions History</h2>
+                <a href="{{ route('customers.interactions.index', ['customer' => $customer]) }}" 
+                   class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                    View All Interactions
+                </a>
+            </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full table-auto">
                     <thead>
@@ -151,6 +153,11 @@
                 </table>
             </div>
         </div>
+
+        <!-- Interaction Search Form -->
+        <form action="{{ route('customers.interactions.index', $customer) }}" method="GET">
+            {{-- form content --}}
+        </form>
     </div>
 </div>
 @endsection

@@ -110,11 +110,13 @@
                     <div class="flex items-center justify-between">
                         <h3 class="text-lg font-semibold text-green-800">Resolution</h3>
                         <span class="text-sm text-green-600">
-                            Resolved {{ $interaction->resolved_at->diffForHumans() }}
-                            by {{ $interaction->resolver?->name ?? 'Unknown' }}
+                            {{ $interaction->resolved_at ? $interaction->resolved_at->diffForHumans() : 'Not resolved' }}
+                            by {{ $interaction->resolver ? $interaction->resolver->name : 'Unknown' }}
                         </span>
                     </div>
-                    <p class="mt-2 text-gray-700">{{ $interaction->resolution }}</p>
+                    @if($interaction->resolution)
+                        <p class="mt-2 text-gray-700">{{ $interaction->resolution }}</p>
+                    @endif
                 </div>
             @endif
         </div>

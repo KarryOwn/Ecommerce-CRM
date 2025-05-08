@@ -7,7 +7,9 @@
         <div class="flex justify-between items-center mb-6">
             <div>
                 <h1 class="text-2xl font-semibold">Segment Details</h1>
-                <p class="text-gray-600 mt-1">Created {{ $segment->created_at->diffForHumans() }}</p>
+                <p class="text-gray-600 mt-1">
+                    {{ $segment->created_at ? $segment->created_at->diffForHumans() : 'Date not available' }}
+                </p>
             </div>
             <div class="flex gap-2">
                 <a href="{{ route('segmentation.edit', $segment) }}" 

@@ -57,39 +57,36 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Source</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($recentTransactions as $transaction)
-                        <tr>
-                            <td class="px-6 py-4">
-                                <a href="{{ route('customers.show', $transaction->customer) }}" 
-                                   class="text-blue-600 hover:text-blue-800">
-                                    {{ $transaction->customer->full_name }}
-                                </a>
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="{{ $transaction->points >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                    {{ $transaction->points > 0 ? '+' : '' }}{{ number_format($transaction->points) }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4">{{ ucfirst($transaction->type) }}</td>
-                            <td class="px-6 py-4">{{ ucfirst($transaction->source) }}</td>
-                            <td class="px-6 py-4">{{ $transaction->created_at->format('M d, Y H:i') }}</td>
-                            <td class="px-6 py-4 text-right">
-                                <a href="{{ route('loyalty.transactions.show', $transaction) }}" 
-                                   class="text-blue-600 hover:text-blue-800">
-                                    View
-                                </a>
-                            </td>
-                        </tr>
+                            <tr>
+                                <td class="px-6 py-4">
+                                    @if($transaction->customer)
+                                        <a href="{{ route('customers.show', $transaction->customer) }}" 
+                                           class="text-blue-600 hover:text-blue-800">
+                                            {{ $transaction->customer->first_name }} {{ $transaction->customer->last_name }}
+                                        </a>
+                                    @else
+                                        <span class="text-gray-500">Deleted Customer</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="{{ $transaction->points >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                        {{ $transaction->points > 0 ? '+' : '' }}{{ number_format($transaction->points) }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">{{ ucfirst($transaction->type) }}</td>
+                                <td class="px-6 py-4">{{ $transaction->source }}</td>
+                                <td class="px-6 py-4">{{ $transaction->created_at->format('M d, Y H:i') }}</td>
+                            </tr>
                         @empty
-                        <tr>
-                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
-                                No recent transactions found
-                            </td>
-                        </tr>
+                            <tr>
+                                <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                    No transactions found
+                                </td>
+                            </tr>
                         @endforelse
                     </tbody>
                 </table>

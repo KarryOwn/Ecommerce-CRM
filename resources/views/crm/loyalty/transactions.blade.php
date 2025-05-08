@@ -24,10 +24,14 @@
                             <tr>
                                 <td class="px-6 py-4">{{ $transaction->created_at->format('M d, Y H:i') }}</td>
                                 <td class="px-6 py-4">
-                                    <a href="{{ route('customers.show', $transaction->customer) }}" 
-                                       class="text-blue-600 hover:text-blue-800">
-                                        {{ $transaction->customer->full_name }}
-                                    </a>
+                                    @if($transaction->customer)
+                                        <a href="{{ route('customers.show', $transaction->customer) }}" 
+                                           class="text-blue-600 hover:text-blue-800">
+                                            {{ $transaction->customer->first_name }} {{ $transaction->customer->last_name }}
+                                        </a>
+                                    @else
+                                        <span class="text-gray-500">Deleted Customer</span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4">
                                     <span class="{{ $transaction->points >= 0 ? 'text-green-600' : 'text-red-600' }}">
@@ -47,9 +51,11 @@
                     </tbody>
                 </table>
             </div>
-            <div class="px-6 py-4 border-t border-gray-200">
-                {{ $transactions->links() }}
-            </div>
+            @if($transactions->hasPages())
+                <div class="px-6 py-4 border-t border-gray-200">
+                    {{ $transactions->links() }}
+                </div>
+            @endif
         </div>
     </div>
 </div>

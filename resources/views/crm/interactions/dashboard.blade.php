@@ -30,7 +30,7 @@
                                 <h3 class="font-medium">{{ $customer->first_name }} {{ $customer->last_name }}</h3>
                                 <p class="text-sm text-gray-500">{{ $customerInteractions->count() }} pending interactions</p>
                             </div>
-                            <a href="{{ route('customers.interactions.index', $customer) }}" 
+                            <a href="{{ route('customers.interactions.index', ['customer' => $customer]) }}" 
                                class="text-blue-600 hover:text-blue-800">
                                 View All
                             </a>
@@ -66,7 +66,8 @@
             <h2 class="text-lg font-semibold mb-4">Recent Activity</h2>
             <div class="space-y-4 max-h-96 overflow-y-auto">
                 @forelse($recentInteractions as $interaction)
-                    <div class="bg-gray-50 p-4 rounded-lg hover:bg-gray-100 transition">
+                    <div class="interaction-item bg-gray-50 p-4 rounded-lg hover:bg-gray-100 transition"
+                         data-status="{{ $interaction->status }}">
                         <div class="flex items-start justify-between">
                             <div class="flex-1">
                                 <div class="flex items-center gap-2 mb-2">
@@ -125,9 +126,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const status = interaction.dataset.status;
             
             if (selectedStatus === 'all' || status === selectedStatus) {
-                interaction.style.display = 'block';
+                interaction.classList.remove('hidden');
+                interaction.classList.add('block');
             } else {
-                interaction.style.display = 'none';
+                interaction.classList.add('hidden');
+                interaction.classList.remove('block');
             }
         });
     });

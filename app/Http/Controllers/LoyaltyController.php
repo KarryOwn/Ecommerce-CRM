@@ -26,7 +26,7 @@ class LoyaltyController extends Controller
             'platinum' => LoyaltyPoint::where('tier', 'platinum')->count(),
         ];
 
-        // Get recent transactions
+        // Get recent transactions with customer relationship
         $recentTransactions = LoyaltyTransaction::with('customer')
             ->latest()
             ->take(10)

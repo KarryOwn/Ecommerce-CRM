@@ -94,7 +94,33 @@ class OrdersController extends Controller
             'status' => 'required|in:processing,shipped,delivered,cancelled'
         ]);
 
-        $order->updateStatus($validated['status']);
+        $oldStatus = $order->status;
+        $newStatus = $validated['status'];
+
+        $order->updateStatus($newStatus);
+
+        // Update customer metrics when order is delivered
+        if ($newStatus === 'delivered' && $oldStatus !== 'delivered') {
+            $customer = $order->customer;
+            
+            // Update customer's lifetime value and last purchase date
+            $customer->update([
+                'lifetime_value' => $customer->lifetime_value + $order->total_amount,
+                'last_purchase_date' => now(),
+                'total_orders' => $customer->total_orders + 1
+            ]);
+        }
+
+        // Reverse the updates if order was delivered but now cancelled
+        if ($oldStatus === 'delivered' && $newStatus === 'cancelled') {
+            $customer = $order->customer;
+            
+            // Subtract the order amount from lifetime value and decrease total orders
+            $customer->update([
+                'lifetime_value' => max(0, $customer->lifetime_value - $order->total_amount),
+                'total_orders' => max(0, $customer->total_orders - 1)
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Order status updated successfully');
     }
