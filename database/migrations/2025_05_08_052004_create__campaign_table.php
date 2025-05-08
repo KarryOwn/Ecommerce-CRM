@@ -16,10 +16,11 @@ return new class extends Migration
             $table->string('name');
             $table->enum('type', ['email', 'sms']);
             $table->foreignId('segment_id')->constrained('customer_segments')->onDelete('cascade');
-            $table->json('content')->nullable(); // Make content nullable
+            $table->json('content')->nullable();
             $table->string('status')->default('pending');
             $table->string('trigger_event')->nullable();
             $table->integer('trigger_delay')->nullable();
+            $table->text('description')->nullable();
             $table->timestamp('scheduled_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamps();
