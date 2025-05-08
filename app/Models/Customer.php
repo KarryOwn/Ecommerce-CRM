@@ -39,8 +39,8 @@ class Customer extends Model
     ];
 
     protected $dispatchesEvents = [
-        'created' => CustomerUpdated::class,
-        'updated' => CustomerUpdated::class
+        'created' => \App\Events\CustomerUpdated::class,
+        'updated' => \App\Events\CustomerUpdated::class,
     ];
 
     public function orders()

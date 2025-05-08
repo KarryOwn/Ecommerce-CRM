@@ -9,8 +9,8 @@ use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvi
 class EventServiceProvider extends ServiceProvider
 {
     protected $listen = [
-        \app\Events\CustomerUpdated::class => [
-            \app\Listeners\EvaluateCustomerSegments::class,
+        \App\Events\CustomerUpdated::class => [
+            \App\Listeners\EvaluateCustomerSegments::class,
         ],
     ];
 
